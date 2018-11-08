@@ -1,32 +1,66 @@
 package com.example.platelminto.betterpocket;
 
-import android.content.Intent;
+import android.content.Context;
 import android.databinding.DataBindingUtil;
-import android.databinding.ViewDataBinding;
-import android.os.Bundle;
+import android.media.Image;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+
+import com.chimbori.crux.articles.ArticleExtractor;
+import com.example.platelminto.betterpocket.databinding.MainActivityBinding;
+
+import java.util.List;
+import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ViewDataBinding mainBinding;
+    private MainActivityBinding mainActivityBinding;
+    private RecyclerView.LayoutManager layoutManager;
+    private ListAdapter listAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
-        mainBinding = DataBindingUtil.setContentView(
-                this, R.layout.activity_main);
+        setTitle("Saved Articles");
+        mainActivityBinding = DataBindingUtil.setContentView(this, R.layout.main_activity);
 
-        final Button button = findViewById(R.id.updateButton);
+        List<Article> articles = Util.getArticleList();
 
-        button.setOnClickListener(new View.OnClickListener() {
+        layoutManager = new LinearLayoutManager(this);
+        mainActivityBinding.recyclerView.setLayoutManager(layoutManager);
+
+        listAdapter = new ListAdapter(articles);
+        mainActivityBinding.recyclerView.setAdapter(listAdapter);
+
+        mainActivityBinding.insertFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, SimpleListActivity.class));
+                listAdapter.addArticle(Util.getRandomArticle());
+                layoutManager.scrollToPosition(0);
             }
         });
+
+        final String rawHTML = rawHTML(getApplicationContext());
+
+        com.chimbori.crux.articles.Article article = ArticleExtractor.with(
+                "https://www.wired.com/story/bitcoin-will-burn-planet-down-how-fast/",
+                rawHTML).extractContent().extractMetadata().article();
+        }
+
+    private static String rawHTML(Context context) {
+
+        final StringBuilder html = new StringBuilder();
+
+        try(Scanner scan = new Scanner(context.getResources().openRawResource(R.raw.raw_html))) {
+            while(scan.hasNextLine()) {
+                html.append(scan.nextLine()).append("\n");
+            }
+        }
+
+        return html.toString();
     }
 }
-
