@@ -1,62 +1,40 @@
 package com.example.platelminto.betterpocket;
 
-import android.content.Context;
-
-import com.chimbori.crux.articles.ArticleExtractor;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.Scanner;
+import android.media.Image;
 
 public class Article {
 
-    private String name;
-    private String surname;
-    private String role;
-    private String description;
+    private String title;
+    private String html;
+    private String company;
+    private Image thumbnail;
 
-    public Article(String name, String surname, String role, String description) {
+    public Article(String url) {
 
-        this.name = name;
-        this.surname = surname;
-        this.role = role;
-        this.description = description;
+        // TODO: set current object to a new Article with private constructor
     }
 
-    public String getName() {
-        return name;
+    public Article(String title, String html, String company, Image thumbnail) {
+
+        this.title = title;
+        this.html = html;
+        this.company = company;
+        this.thumbnail = thumbnail;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getTitle() {
+        return title;
     }
 
-    public String getSurname() {
-        return surname;
+    public String getHtml() {
+        return html;
     }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
+    public String getCompany() {
+        return company;
     }
 
-    public String getFullName() {
-        return name + " " + surname;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public Image getThumbnail() {
+        return thumbnail;
     }
 }
