@@ -1,4 +1,4 @@
 /build
 app.iml
-.idea/*
+/.idea/*
 local.properties
