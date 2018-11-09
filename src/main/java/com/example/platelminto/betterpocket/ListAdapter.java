@@ -38,7 +38,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.SimpleViewHold
 
     public void addArticle(Article article) {
 
-        articles.add(0, article);
+        articles.add(0, new Article("https://www.wired.com/story/bitcoin-will-burn-planet-down-how-fast/"));
         notifyItemInserted(0);
     }
 

@@ -26,58 +26,39 @@
             android:padding="5dp">
 
             <TextView
-                android:id="@+id/nameTextView"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginStart="5dp"
-                android:layout_marginLeft="5dp"
-                android:text="@{article.getFullName()}"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                card_view:layout_constraintBottom_toTopOf="@+id/roleTextView"
-                card_view:layout_constraintEnd_toEndOf="parent"
+                android:id="@+id/hy"
+                android:layout_width="308dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="@{article.title}"
+                android:textSize="16sp"
+                card_view:layout_constraintBottom_toTopOf="@+id/descriptionTextView"
                 card_view:layout_constraintLeft_toRightOf="@+id/imageView"
-                card_view:layout_constraintRight_toRightOf="parent"
                 card_view:layout_constraintStart_toEndOf="@+id/imageView"
                 card_view:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/roleTextView"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginStart="5dp"
-                android:layout_marginLeft="5dp"
-                android:text="@{article.role}"
-                android:textSize="18sp"
-                card_view:layout_constraintBottom_toTopOf="@+id/descriptionTextView"
-                card_view:layout_constraintEnd_toEndOf="parent"
-                card_view:layout_constraintLeft_toRightOf="@+id/imageView"
-                card_view:layout_constraintRight_toRightOf="parent"
-                card_view:layout_constraintStart_toEndOf="@+id/imageView"
-                card_view:layout_constraintTop_toBottomOf="@+id/nameTextView" />
-
-            <TextView
                 android:id="@+id/descriptionTextView"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginStart="5dp"
-                android:layout_marginLeft="5dp"
-                android:text="@{article.description}"
-                android:textSize="18sp"
+                android:layout_width="308dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="@{article.site}"
+                android:textSize="14sp"
                 card_view:layout_constraintBottom_toBottomOf="parent"
-                card_view:layout_constraintEnd_toEndOf="parent"
-                card_view:layout_constraintRight_toRightOf="parent"
                 card_view:layout_constraintStart_toEndOf="@+id/imageView"
-                card_view:layout_constraintTop_toBottomOf="@+id/roleTextView" />
+                card_view:layout_constraintTop_toBottomOf="@+id/hy" />
 
             <ImageView
                 android:id="@+id/imageView"
-                android:layout_width="81dp"
-                android:layout_height="81dp"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:contentDescription="@string/student_id_desc"
                 android:src="@drawable/image"
-                card_view:layout_constraintEnd_toStartOf="@+id/nameTextView"
-                card_view:layout_constraintStart_toStartOf="parent"
+                card_view:layout_constraintBottom_toBottomOf="parent"
+                card_view:layout_constraintEnd_toStartOf="@+id/hy"
+                card_view:layout_constraintHorizontal_chainStyle="packed"
                 card_view:layout_constraintTop_toTopOf="parent"
                 card_view:srcCompat="@drawable/image" />
         </android.support.constraint.ConstraintLayout>

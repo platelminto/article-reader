@@ -3,4 +3,5 @@
     <string name="edit_message">Enter a message</string>
     <string name="button_send">Send</string>
     <string name="student_id_desc">Image of my student id</string>
+    <string name="test_str">hell</string>
 </resources>
