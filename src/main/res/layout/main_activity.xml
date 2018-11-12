@@ -23,6 +23,7 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:layout_marginEnd="14dp"
-            android:layout_marginBottom="14dp" />
+            android:layout_marginBottom="14dp"
+            android:onClick="doTheDownload" />
     </RelativeLayout>
 </layout>

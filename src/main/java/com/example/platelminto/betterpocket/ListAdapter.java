@@ -19,6 +19,11 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.SimpleViewHold
         this.articles = articles;
     }
 
+    public List<Article> getArticles() {
+
+        return articles;
+    }
+
     @Override
     public SimpleViewHolder onCreateViewHolder(ViewGroup parent, int type) {
 
@@ -38,7 +43,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.SimpleViewHold
 
     public void addArticle(Article article) {
 
-        articles.add(0, new Article("https://www.wired.com/story/bitcoin-will-burn-planet-down-how-fast/"));
+        articles.add(0, article);
         notifyItemInserted(0);
     }
 

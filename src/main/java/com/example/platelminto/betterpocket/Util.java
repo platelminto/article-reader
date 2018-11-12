@@ -25,9 +25,8 @@ public class Util {
         Article article13 = new Article("Hfsd", "Lfre", "tbgfb", null);
         Article article14 = new Article("Hfsd", "Lfre", "tbgfb", null);
         Article article15 = new Article("Hfsd", "Lfre", "tbgfb", null);
-        Article article16 = new Article("https://www.wired.com/story/bitcoin-will-burn-planet-down-how-fast/");
 
-        return new ArrayList<>(Arrays.asList(article1, article2, article3, article4, article5, article6, article7, article8, article9, article10, article11, article12, article13, article14, article15, article16));
+        return new ArrayList<>(Arrays.asList(article1, article2, article3, article4, article5, article6, article7, article8, article9, article10, article11, article12, article13, article14, article15));
     }
 
     public static Article getRandomArticle() {
