@@ -47,12 +47,31 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialises the handler for newly downloaded articles
         articleHandler = new ArticleHandler(Looper.getMainLooper(), listAdapter, layoutManager);
+
+        downloadURLFromSharing();
+    }
+
+    // Handles sharing a url from a browser to the app
+    private void downloadURLFromSharing() {
+
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+
+        // If the data was sent to the app, and it was plain text, download that url
+        if(action.equals(Intent.ACTION_SEND) && type != null && type.equals("text/plain")) {
+            String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+            if(sharedText != null) {
+
+                downloadURL(sharedText);
+            }
+        }
     }
 
     // Starts downloading an article in the background
-    public void downloadURL(View v) {
+    public void downloadURL(String url) {
 
-        DownloadTask.url = "https://www.wired.com/story/bitcoin-will-burn-planet-down-how-fast/";
+        DownloadTask.url = url;
 
         Intent i = new Intent(this, DownloadTask.class);
         i.putExtra(DownloadTask.EXTRA_MESSENGER, new Messenger(articleHandler));
