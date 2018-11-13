@@ -10,7 +10,8 @@ import com.example.platelminto.betterpocket.databinding.CardListItemBinding;
 
 import java.util.List;
 
-public class ListAdapter extends RecyclerView.Adapter<ListAdapter.SimpleViewHolder> {
+// Class to handle the list of articles in the RecyclerView
+public class ListAdapter extends RecyclerView.Adapter<ListAdapter.CardViewHolder> {
 
     private List<Article> articles;
 
@@ -24,23 +25,26 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.SimpleViewHold
         return articles;
     }
 
+    // Generates the View from the card list items (probably)
     @Override
-    public SimpleViewHolder onCreateViewHolder(ViewGroup parent, int type) {
+    public CardViewHolder onCreateViewHolder(ViewGroup parent, int type) {
 
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.card_list_item, parent, false);
 
-        return new SimpleViewHolder(v);
+        return new CardViewHolder(v);
     }
 
+    // Sets the article variable used in the layout for every binding (every article)
     @Override
-    public void onBindViewHolder(SimpleViewHolder holder, int position) {
+    public void onBindViewHolder(CardViewHolder holder, int position) {
 
         final Article article = articles.get(position);
         holder.getBinding().setVariable(BR.article, article);
         holder.getBinding().executePendingBindings();
     }
 
+    // Adds article to the recyclerView
     public void addArticle(Article article) {
 
         articles.add(0, article);
@@ -52,11 +56,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.SimpleViewHold
         return articles.size();
     }
 
-    static class SimpleViewHolder extends RecyclerView.ViewHolder {
+    // Not sure what this does, binds a class to the bindings that are generated?
+    static class CardViewHolder extends RecyclerView.ViewHolder {
 
         private CardListItemBinding listItemBinding;
 
-        SimpleViewHolder(View v) {
+        CardViewHolder(View v) {
             super(v);
             listItemBinding = DataBindingUtil.bind(v);
         }

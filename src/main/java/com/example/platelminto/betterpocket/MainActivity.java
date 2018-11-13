@@ -2,11 +2,10 @@ package com.example.platelminto.betterpocket;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.os.Environment;
+import android.os.Bundle;
 import android.os.Looper;
 import android.os.Messenger;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -20,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
     protected MainActivityBinding mainActivityBinding;
     protected RecyclerView.LayoutManager layoutManager;
     protected ListAdapter listAdapter;
-    ArticleHandler mHandler;
+    ArticleHandler articleHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,26 +31,31 @@ public class MainActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         mainActivityBinding.recyclerView.setLayoutManager(layoutManager);
 
+        // Needs to be set here to get the general private storage directory for the entire app
         FileUtil.articleStorage = FileUtil.getPrivateStorageDir(this, "articles");
 
         listAdapter = new ListAdapter(FileUtil.getArticlesFromStorage());
         mainActivityBinding.recyclerView.setAdapter(listAdapter);
 
+        // Disables dragging of article cards, and only allows swiping left
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback =
-                new ArticleTouchCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT, listAdapter);
+                new ArticleTouchCallback(0, ItemTouchHelper.LEFT, listAdapter);
 
+        // Attaches the swiping-ability to the recyclerView
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(mainActivityBinding.recyclerView);
 
-        mHandler = new ArticleHandler(Looper.getMainLooper(), listAdapter, layoutManager);
+        // Initialises the handler for newly downloaded articles
+        articleHandler = new ArticleHandler(Looper.getMainLooper(), listAdapter, layoutManager);
     }
 
-    public void doTheDownload(View v) {
+    // Starts downloading an article in the background
+    public void downloadURL(View v) {
 
         DownloadTask.url = "https://www.wired.com/story/bitcoin-will-burn-planet-down-how-fast/";
 
         Intent i = new Intent(this, DownloadTask.class);
-        i.putExtra(DownloadTask.EXTRA_MESSENGER, new Messenger(mHandler));
+        i.putExtra(DownloadTask.EXTRA_MESSENGER, new Messenger(articleHandler));
         startService(i);
     }
 
@@ -62,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
         final Article article = listAdapter.getArticles().get(itemPosition);
 
+        // Opens a new activity, passing through the article object
         intent.putExtra(EXTRA_MESSAGE, article);
         startActivity(intent);
     }

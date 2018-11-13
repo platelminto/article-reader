@@ -52,6 +52,7 @@ public class Article implements Serializable {
         return id;
     }
 
+    // Usually set to the HashCode of the object on creation
     public void setId(int id) {
 
         this.id = id;

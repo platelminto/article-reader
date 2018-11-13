@@ -1,7 +1,5 @@
 package com.example.platelminto.betterpocket;
 
-import android.content.Context;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -9,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 
 import com.chimbori.crux.articles.ArticleExtractor;
 
+// Attached to the main activity, handles an article when it becomes available (after download)
 public class ArticleHandler extends Handler {
 
     private ListAdapter listAdapter;
@@ -22,6 +21,7 @@ public class ArticleHandler extends Handler {
         this.layoutManager = layoutManager;
     }
 
+    // Creates a fully defined article object, stores it, and adds it to the list
     @Override
     public void handleMessage(Message inputMessage) {
 
@@ -30,6 +30,7 @@ public class ArticleHandler extends Handler {
 
         com.chimbori.crux.articles.Article article = null;
 
+        // article is now a Crux article object with metadata & content extracted
         try {
             article = ArticleExtractor.with(
                     DownloadTask.url,
