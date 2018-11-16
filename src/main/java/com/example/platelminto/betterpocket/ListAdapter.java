@@ -20,7 +20,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.CardViewHolder
         this.articles = articles;
     }
 
-    public List<Article> getArticles() {
+    List<Article> getArticles() {
 
         return articles;
     }
@@ -45,7 +45,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.CardViewHolder
     }
 
     // Adds article to the recyclerView
-    public void addArticle(Article article) {
+    void addArticle(Article article) {
 
         articles.add(0, article);
         notifyItemInserted(0);

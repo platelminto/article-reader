@@ -12,13 +12,13 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileUtil {
+class FileUtil {
 
     // Needs to be set from the MainActivity, represents the app's article storage directory
-    protected static File articleStorage;
+    static File articleStorage;
 
     // Serializes & writes the Article to its own file
-    public static void writeObjectToFile(Article article) {
+    static void writeObjectToFile(Article article) {
 
         File articleFile = getArticleFile(article);
         try(ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(articleFile))) {
@@ -32,12 +32,12 @@ public class FileUtil {
     }
 
     // ID is usually the article object's hashcode
-    public static File getArticleFile(Article article) {
+    static File getArticleFile(Article article) {
 
         return new File(articleStorage, Integer.toString(article.getId()) + ".html");
     }
 
-    public static List<Article> getArticlesFromStorage() {
+    static List<Article> getArticlesFromStorage() {
 
         final List<Article> articles = new ArrayList<>();
 
@@ -56,7 +56,7 @@ public class FileUtil {
     }
 
     // External storage but private, removed when uninstalling the app
-    public static File getPrivateStorageDir(Context context, String folderName) {
+    static File getPrivateStorageDir(Context context, String folderName) {
 
         File file = new File(context.getExternalFilesDir(
                 Environment.DIRECTORY_DOWNLOADS), folderName);

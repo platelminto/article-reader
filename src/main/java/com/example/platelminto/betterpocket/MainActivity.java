@@ -1,17 +1,22 @@
 package com.example.platelminto.betterpocket;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Looper;
-import android.os.Messenger;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 
+import com.chimbori.crux.articles.ArticleExtractor;
 import com.example.platelminto.betterpocket.databinding.MainActivityBinding;
+
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
     protected MainActivityBinding mainActivityBinding;
     protected RecyclerView.LayoutManager layoutManager;
     protected ListAdapter listAdapter;
-    ArticleHandler articleHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +49,6 @@ public class MainActivity extends AppCompatActivity {
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(mainActivityBinding.recyclerView);
 
-        // Initialises the handler for newly downloaded articles
-        articleHandler = new ArticleHandler(Looper.getMainLooper(), listAdapter, layoutManager);
-
         downloadURLFromSharing();
     }
 
@@ -59,10 +60,9 @@ public class MainActivity extends AppCompatActivity {
         String type = intent.getType();
 
         // If the data was sent to the app, and it was plain text, download that url
-        if(action.equals(Intent.ACTION_SEND) && type != null && type.equals("text/plain")) {
+        if (Intent.ACTION_SEND.equals(action) && type != null && type.equals("text/plain")) {
             String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
-            if(sharedText != null) {
-
+            if (sharedText != null) {
                 downloadURL(sharedText);
             }
         }
@@ -71,11 +71,7 @@ public class MainActivity extends AppCompatActivity {
     // Starts downloading an article in the background
     public void downloadURL(String url) {
 
-        DownloadTask.url = url;
-
-        Intent i = new Intent(this, DownloadTask.class);
-        i.putExtra(DownloadTask.EXTRA_MESSENGER, new Messenger(articleHandler));
-        startService(i);
+        new FetchFeedTask().execute(url);
     }
 
     public void openArticle(View view) {
@@ -88,5 +84,66 @@ public class MainActivity extends AppCompatActivity {
         // Opens a new activity, passing through the article object
         intent.putExtra(EXTRA_MESSAGE, article);
         startActivity(intent);
+    }
+
+    // Background task to download a url's html in the background
+    @SuppressLint("StaticFieldLeak")
+    private class FetchFeedTask extends AsyncTask<String, Void, com.chimbori.crux.articles.Article> {
+
+        @Override
+        protected void onPreExecute() {
+
+        }
+
+        // Downloads the html in the background and returns a Crux object
+        @Override
+        protected com.chimbori.crux.articles.Article doInBackground(String... urls) {
+
+            StringBuilder content = new StringBuilder();
+            URLConnection connection;
+
+            try {
+                connection =  new URL(urls[0]).openConnection();
+                Scanner scanner = new Scanner(connection.getInputStream());
+                while(scanner.hasNextLine()) {
+                    final String s = scanner.nextLine();
+                    content.append(s).append("\n");
+                }
+            } catch (Exception ex ) {
+                ex.printStackTrace();
+            }
+
+            return getCruxArticle(urls[0], content.toString());
+        }
+
+        // Get a Crux article object from a given url and its html
+        private com.chimbori.crux.articles.Article getCruxArticle(String url, String html) {
+
+            com.chimbori.crux.articles.Article article;
+
+            // article now becomes a Crux article object with metadata & content extracted
+            try {
+                article = ArticleExtractor.with(
+                        url,
+                        html).extractContent().extractMetadata().article();
+            } catch(IllegalArgumentException e) {
+                return null;
+            }
+
+            return article;
+        }
+
+        // Generates an Article object from the Crux object and adds it, then scrolls to the start
+        @Override
+        protected void onPostExecute(com.chimbori.crux.articles.Article article) {
+
+            final Article articleObj = new Article(
+                    article.title, article.document.html(), article.siteName, null);
+            articleObj.setId(articleObj.hashCode());
+            FileUtil.writeObjectToFile(articleObj);
+
+            listAdapter.addArticle(articleObj);
+            layoutManager.scrollToPosition(0);
+        }
     }
 }

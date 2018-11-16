@@ -10,7 +10,7 @@ public class ArticleTouchCallback extends ItemTouchHelper.SimpleCallback {
 
     private ListAdapter listAdapter;
 
-    public ArticleTouchCallback(int dragDirs, int swipeDirs, ListAdapter listAdapter) {
+    ArticleTouchCallback(int dragDirs, int swipeDirs, ListAdapter listAdapter) {
 
         super(dragDirs, swipeDirs);
 
