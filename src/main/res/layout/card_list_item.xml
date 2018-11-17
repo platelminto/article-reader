@@ -27,29 +27,27 @@
             android:padding="5dp">
 
             <TextView
-                android:id="@+id/hy"
+                android:id="@+id/title"
                 android:layout_width="308dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
                 android:ellipsize="end"
                 android:maxLines="2"
                 android:text="@{article.title}"
                 android:textSize="16sp"
-                card_view:layout_constraintBottom_toTopOf="@+id/descriptionTextView"
+                card_view:layout_constraintBottom_toTopOf="@+id/siteName"
                 card_view:layout_constraintLeft_toRightOf="@+id/imageView"
                 card_view:layout_constraintStart_toEndOf="@+id/imageView"
                 card_view:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/descriptionTextView"
+                android:id="@+id/siteName"
                 android:layout_width="308dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
                 android:text="@{article.site}"
                 android:textSize="14sp"
                 card_view:layout_constraintBottom_toBottomOf="parent"
                 card_view:layout_constraintStart_toEndOf="@+id/imageView"
-                card_view:layout_constraintTop_toBottomOf="@+id/hy" />
+                card_view:layout_constraintTop_toBottomOf="@+id/title" />
 
             <ImageView
                 android:id="@+id/imageView"
@@ -58,7 +56,7 @@
                 android:contentDescription="@string/student_id_desc"
                 android:src="@drawable/image"
                 card_view:layout_constraintBottom_toBottomOf="parent"
-                card_view:layout_constraintEnd_toStartOf="@+id/hy"
+                card_view:layout_constraintEnd_toStartOf="@+id/title"
                 card_view:layout_constraintHorizontal_chainStyle="packed"
                 card_view:layout_constraintTop_toTopOf="parent"
                 card_view:srcCompat="@drawable/image" />

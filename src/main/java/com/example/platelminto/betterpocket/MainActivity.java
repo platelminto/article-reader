@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
         layoutManager = new LinearLayoutManager(this);
         mainActivityBinding.recyclerView.setLayoutManager(layoutManager);
+        // TODO: Fix the layout to have correctly resized text boxes
 
         // Needs to be set here to get the general private storage directory for the entire app
         FileUtil.articleStorage = FileUtil.getPrivateStorageDir(this, "articles");
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback =
                 new ArticleTouchCallback(0, ItemTouchHelper.LEFT, listAdapter);
 
-        // Attaches the swiping-ability to the recyclerView
+        // Attaches the swiping ability to the recyclerView
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(mainActivityBinding.recyclerView);
 
@@ -64,6 +65,9 @@ public class MainActivity extends AppCompatActivity {
             String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
             if (sharedText != null) {
                 downloadURL(sharedText);
+                // Needed to avoid redownloading the same article when recalling onCreate(),
+                // which happens, for example, when rotating the screen
+                setIntent(new Intent(this, MainActivity.class));
             }
         }
     }
@@ -74,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
         new FetchFeedTask().execute(url);
     }
 
+    // Opens the article view
     public void openArticle(View view) {
 
         Intent intent = new Intent(this, ArticleActivity.class);
@@ -91,9 +96,7 @@ public class MainActivity extends AppCompatActivity {
     private class FetchFeedTask extends AsyncTask<String, Void, com.chimbori.crux.articles.Article> {
 
         @Override
-        protected void onPreExecute() {
-
-        }
+        protected void onPreExecute() {}
 
         // Downloads the html in the background and returns a Crux object
         @Override
@@ -116,6 +119,19 @@ public class MainActivity extends AppCompatActivity {
             return getCruxArticle(urls[0], content.toString());
         }
 
+        // Generates an Article object from the Crux object and adds it, then scrolls to the start
+        @Override
+        protected void onPostExecute(com.chimbori.crux.articles.Article article) {
+
+            final Article articleObj = new Article(
+                    article.title, article.document.html(), article.siteName, null);
+            articleObj.setId(articleObj.hashCode());
+            FileUtil.writeObjectToFile(articleObj);
+
+            listAdapter.addArticle(articleObj);
+            layoutManager.scrollToPosition(0);
+        }
+
         // Get a Crux article object from a given url and its html
         private com.chimbori.crux.articles.Article getCruxArticle(String url, String html) {
 
@@ -131,19 +147,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             return article;
-        }
-
-        // Generates an Article object from the Crux object and adds it, then scrolls to the start
-        @Override
-        protected void onPostExecute(com.chimbori.crux.articles.Article article) {
-
-            final Article articleObj = new Article(
-                    article.title, article.document.html(), article.siteName, null);
-            articleObj.setId(articleObj.hashCode());
-            FileUtil.writeObjectToFile(articleObj);
-
-            listAdapter.addArticle(articleObj);
-            layoutManager.scrollToPosition(0);
         }
     }
 }

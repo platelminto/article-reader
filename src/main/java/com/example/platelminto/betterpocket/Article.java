@@ -1,6 +1,7 @@
 package com.example.platelminto.betterpocket;
 
 import android.media.Image;
+import android.os.Build;
 import android.text.Html;
 import android.text.Spanned;
 
@@ -29,7 +30,11 @@ public class Article implements Serializable {
 
     public Spanned getHtmlObject() {
 
-        return Html.fromHtml(html);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
+        } else {
+            return Html.fromHtml(html);
+        }
     }
 
     public String getTitle() {
