@@ -3,20 +3,18 @@ package com.example.platelminto.betterpocket;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import com.chimbori.crux.articles.ArticleExtractor;
 import com.example.platelminto.betterpocket.databinding.MainActivityBinding;
-
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,6 +22,8 @@ public class MainActivity extends AppCompatActivity {
     protected MainActivityBinding mainActivityBinding;
     protected RecyclerView.LayoutManager layoutManager;
     protected ListAdapter listAdapter;
+    WebView browser;
+    private String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(mainActivityBinding.recyclerView);
 
+        setBrowserUp();
+
         downloadURLFromSharing();
     }
 
@@ -72,16 +74,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Starts downloading an article in the background
+    // Starts downloading an article
     public void downloadURL(String url) {
 
-        new FetchFeedTask().execute(url);
+        this.url = url;
+        browser.loadUrl(url);
     }
 
     // Opens the article view
     public void openArticle(View view) {
 
-        Intent intent = new Intent(this, ArticleActivity.class);
+        final Intent intent = new Intent(this, ArticleActivity.class);
         final int itemPosition = mainActivityBinding.recyclerView.getChildLayoutPosition(view);
 
         final Article article = listAdapter.getArticles().get(itemPosition);
@@ -91,62 +94,68 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    // Background task to download a url's html in the background
-    @SuppressLint("StaticFieldLeak")
-    private class FetchFeedTask extends AsyncTask<String, Void, com.chimbori.crux.articles.Article> {
+    @SuppressLint("SetJavaScriptEnabled")
+    private void setBrowserUp() {
 
-        @Override
-        protected void onPreExecute() {}
+        browser = new WebView(getApplicationContext());
 
-        // Downloads the html in the background and returns a Crux object
-        @Override
-        protected com.chimbori.crux.articles.Article doInBackground(String... urls) {
+        browser.getSettings().setJavaScriptEnabled(true);
+        browser.getSettings().setDomStorageEnabled(true);
 
-            StringBuilder content = new StringBuilder();
-            URLConnection connection;
+        /* Register a new JavaScript interface called HTMLOUT */
+        MyJavaScriptInterface myInterface = new MyJavaScriptInterface();
+        browser.addJavascriptInterface(myInterface, "HTMLOUT");
 
-            try {
-                connection =  new URL(urls[0]).openConnection();
-                Scanner scanner = new Scanner(connection.getInputStream());
-                while(scanner.hasNextLine()) {
-                    final String s = scanner.nextLine();
-                    content.append(s).append("\n");
-                }
-            } catch (Exception ex ) {
-                ex.printStackTrace();
+        browser.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                browser.loadUrl("javascript:HTMLOUT.showHTML" +
+                        "('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');");
             }
+        });
+    }
 
-            return getCruxArticle(urls[0], content.toString());
+    // Get a Crux article object from a given url and its html
+    private com.chimbori.crux.articles.Article getCruxArticle(String url, String html) {
+
+        com.chimbori.crux.articles.Article article;
+
+        // article now becomes a Crux article object with metadata & content extracted
+        try {
+            article = ArticleExtractor.with(
+                    url,
+                    html).extractContent().extractMetadata().article();
+        } catch (IllegalArgumentException e) {
+            return null;
         }
 
-        // Generates an Article object from the Crux object and adds it, then scrolls to the start
-        @Override
-        protected void onPostExecute(com.chimbori.crux.articles.Article article) {
+        return article;
+    }
+
+    // An instance of this class will be registered as a JavaScript interface
+    class MyJavaScriptInterface {
+        @JavascriptInterface
+        @SuppressWarnings("unused")
+        public void showHTML(String html) {
+
+            System.out.println("yooo");
+
+            com.chimbori.crux.articles.Article article = getCruxArticle(url, html);
 
             final Article articleObj = new Article(
-                    article.title, article.document.html(), article.siteName, null);
+                    article.title, article.document.html(), article.siteName, article, null);
             articleObj.setId(articleObj.hashCode());
             FileUtil.writeObjectToFile(articleObj);
 
-            listAdapter.addArticle(articleObj);
-            layoutManager.scrollToPosition(0);
-        }
+            for (int i = 0; i < article.images.size(); i++) {
 
-        // Get a Crux article object from a given url and its html
-        private com.chimbori.crux.articles.Article getCruxArticle(String url, String html) {
-
-            com.chimbori.crux.articles.Article article;
-
-            // article now becomes a Crux article object with metadata & content extracted
-            try {
-                article = ArticleExtractor.with(
-                        url,
-                        html).extractContent().extractMetadata().article();
-            } catch(IllegalArgumentException e) {
-                return null;
+                System.out.println("HEL:" + article.images.get(i));
             }
 
-            return article;
+            System.out.println("THIS IS US: " + html);
+
+            listAdapter.addArticle(articleObj);
+            layoutManager.scrollToPosition(0);
         }
     }
 }

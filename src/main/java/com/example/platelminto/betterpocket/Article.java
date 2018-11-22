@@ -13,14 +13,16 @@ public class Article implements Serializable {
     private String html;
     private String site;
     private int id;
+    private transient com.chimbori.crux.articles.Article cruxArticle;
     private Image thumbnail;
 
-    public Article(String title, String html, String site, Image thumbnail) {
+    public Article(String title, String html, String site, com.chimbori.crux.articles.Article cruxArticle, Image thumbnail) {
 
         this.title = title;
         this.html = html;
         this.site = site;
         this.thumbnail = thumbnail;
+        this.cruxArticle = cruxArticle;
     }
 
     private Image getImageFromURL(String url) { // TODO
@@ -61,5 +63,9 @@ public class Article implements Serializable {
     public void setId(int id) {
 
         this.id = id;
+    }
+
+    public com.chimbori.crux.articles.Article getCruxArticle() {
+        return cruxArticle;
     }
 }
