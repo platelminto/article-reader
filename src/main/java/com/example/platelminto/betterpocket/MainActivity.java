@@ -3,6 +3,7 @@ package com.example.platelminto.betterpocket;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -107,8 +108,11 @@ public class MainActivity extends AppCompatActivity {
         browser.addJavascriptInterface(myInterface, "HTMLOUT");
 
         browser.setWebViewClient(new WebViewClient() {
+
             @Override
             public void onPageFinished(WebView view, String url) {
+                view.scrollTo(0, view.getContentHeight());
+                System.out.println("YO" + view.getScrollY() + " " + view.getContentHeight());
                 browser.loadUrl("javascript:HTMLOUT.showHTML" +
                         "('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');");
             }
@@ -138,8 +142,6 @@ public class MainActivity extends AppCompatActivity {
         @SuppressWarnings("unused")
         public void showHTML(String html) {
 
-            System.out.println("yooo");
-
             com.chimbori.crux.articles.Article article = getCruxArticle(url, html);
 
             final Article articleObj = new Article(
@@ -151,8 +153,6 @@ public class MainActivity extends AppCompatActivity {
 
                 System.out.println("HEL:" + article.images.get(i));
             }
-
-            System.out.println("THIS IS US: " + html);
 
             listAdapter.addArticle(articleObj);
             layoutManager.scrollToPosition(0);
