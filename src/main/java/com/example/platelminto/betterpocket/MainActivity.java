@@ -23,8 +23,9 @@ public class MainActivity extends AppCompatActivity {
     protected MainActivityBinding mainActivityBinding;
     protected RecyclerView.LayoutManager layoutManager;
     protected ListAdapter listAdapter;
-    WebView browser;
+    private WebView browser;
     private String url;
+    private boolean javascriptDownload = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         // Needs to be set here to get the general private storage directory for the entire app
         FileUtil.articleStorage = FileUtil.getPrivateStorageDir(this, "articles");
 
-        listAdapter = new ListAdapter(FileUtil.getArticlesFromStorage());
+        listAdapter = new ListAdapter(this, FileUtil.getArticlesFromStorage());
         mainActivityBinding.recyclerView.setAdapter(listAdapter);
 
         // Disables dragging of article cards, and only allows swiping left
@@ -79,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
     public void downloadURL(String url) {
 
         this.url = url;
+        javascriptDownload = false; // This prevents the raw HTML from being processed as an article
         browser.loadUrl(url);
     }
 
@@ -95,24 +97,30 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    // Set the browser up to use JavaScript
     @SuppressLint("SetJavaScriptEnabled")
     private void setBrowserUp() {
 
+        // Needs to be an instance variable (as opposed to local) or it will be destroyed
+        // after leaving the method
         browser = new WebView(getApplicationContext());
 
         browser.getSettings().setJavaScriptEnabled(true);
+        // Some JavaScript needs to access localstorage or the rest of it will crash
         browser.getSettings().setDomStorageEnabled(true);
 
-        /* Register a new JavaScript interface called HTMLOUT */
         MyJavaScriptInterface myInterface = new MyJavaScriptInterface();
         browser.addJavascriptInterface(myInterface, "HTMLOUT");
 
+        // Once the raw HTML is obtained, run it as JavaScript to get the dynamic elements (images)
         browser.setWebViewClient(new WebViewClient() {
 
             @Override
             public void onPageFinished(WebView view, String url) {
+
+                // Some sites (eg: wired) only load images when scrolling by them, so scroll to
+                // the bottom before running the JavaScript to actually get them.
                 view.scrollTo(0, view.getContentHeight());
-                System.out.println("YO" + view.getScrollY() + " " + view.getContentHeight());
                 browser.loadUrl("javascript:HTMLOUT.showHTML" +
                         "('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');");
             }
@@ -142,20 +150,28 @@ public class MainActivity extends AppCompatActivity {
         @SuppressWarnings("unused")
         public void showHTML(String html) {
 
-            com.chimbori.crux.articles.Article article = getCruxArticle(url, html);
+            if(javascriptDownload) {
+                System.out.println(html);
 
-            final Article articleObj = new Article(
-                    article.title, article.document.html(), article.siteName, article, null);
-            articleObj.setId(articleObj.hashCode());
-            FileUtil.writeObjectToFile(articleObj);
+                com.chimbori.crux.articles.Article article = getCruxArticle(url, html);
 
-            for (int i = 0; i < article.images.size(); i++) {
+                final Article articleObj = new Article(
+                        article.title, article.document.html(), article.siteName, article, null);
+                articleObj.setId(articleObj.hashCode());
+                FileUtil.writeObjectToFile(articleObj);
 
-                System.out.println("HEL:" + article.images.get(i));
+                //System.out.println(article.document.html());
+
+                for (int i = 0; i < article.images.size(); i++) {
+
+                    System.out.println("HEL:" + article.images.get(i));
+                }
+
+                listAdapter.addArticle(articleObj);
+                runOnUiThread(() -> layoutManager.scrollToPosition(0));
+            } else { // Next time, do add the post-JS HTML.
+                javascriptDownload = true;
             }
-
-            listAdapter.addArticle(articleObj);
-            layoutManager.scrollToPosition(0);
         }
     }
 }

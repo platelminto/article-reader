@@ -1,6 +1,7 @@
 package com.example.platelminto.betterpocket;
 
 import android.databinding.DataBindingUtil;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,10 +14,12 @@ import java.util.List;
 // Class to handle the list of articles in the RecyclerView
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.CardViewHolder> {
 
+    private AppCompatActivity activity;
     private List<Article> articles;
 
-    ListAdapter(List<Article> articles) {
+    ListAdapter(AppCompatActivity activity, List<Article> articles) {
 
+        this.activity = activity;
         this.articles = articles;
     }
 
@@ -48,7 +51,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.CardViewHolder
     void addArticle(Article article) {
 
         articles.add(0, article);
-        notifyItemInserted(0);
+        activity.runOnUiThread(() -> notifyItemInserted(0));
     }
 
     @Override
